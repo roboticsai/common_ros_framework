@@ -26,6 +26,8 @@ from PIL import Image
 #import tensorflow as tf # TF2
 import tflite_runtime.interpreter as tflite
 
+import cv2
+
 def load_labels(filename):
   with open(filename, 'r') as f:
     return [line.strip() for line in f.readlines()]
@@ -60,10 +62,12 @@ if __name__ == '__main__':
       '--num_threads', default=None, type=int, help='number of threads')
   args = parser.parse_args()
 
+  # Create a interpreter instance with given model
   interpreter = tflite.Interpreter(
       model_path=args.model_file)
   interpreter.allocate_tensors()
 
+  # Get the input and output info of given model
   input_details = interpreter.get_input_details()
   output_details = interpreter.get_output_details()
 
@@ -73,6 +77,7 @@ if __name__ == '__main__':
   # NxHxWxC, H:1, W:2
   height = input_details[0]['shape'][1]
   width = input_details[0]['shape'][2]
+  # Resize given input image to fit the size of input_details
   img = Image.open(args.image).resize((width, height))
 
   # add N dim
